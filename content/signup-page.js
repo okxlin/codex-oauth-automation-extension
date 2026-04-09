@@ -1013,19 +1013,50 @@ async function step5_fillNameBirthday(payload) {
 
   let birthdayMode = false;
   let ageInput = null;
+  let yearSpinner = null;
+  let monthSpinner = null;
+  let daySpinner = null;
+  let hiddenBirthday = null;
+  let yearReactSelect = null;
+  let monthReactSelect = null;
+  let dayReactSelect = null;
+  let visibleAgeInput = false;
+  let visibleBirthdaySpinners = false;
+  let visibleBirthdaySelects = false;
 
   for (let i = 0; i < 100; i++) {
-    const yearSpinner = document.querySelector('[role="spinbutton"][data-type="year"]');
-    const monthSpinner = document.querySelector('[role="spinbutton"][data-type="month"]');
-    const daySpinner = document.querySelector('[role="spinbutton"][data-type="day"]');
-    const hiddenBirthday = document.querySelector('input[name="birthday"]');
+    yearSpinner = document.querySelector('[role="spinbutton"][data-type="year"]');
+    monthSpinner = document.querySelector('[role="spinbutton"][data-type="month"]');
+    daySpinner = document.querySelector('[role="spinbutton"][data-type="day"]');
+    hiddenBirthday = document.querySelector('input[name="birthday"]');
     ageInput = document.querySelector('input[name="age"]');
+    yearReactSelect = findBirthdayReactAriaSelect('年');
+    monthReactSelect = findBirthdayReactAriaSelect('月');
+    dayReactSelect = findBirthdayReactAriaSelect('天');
 
-    if ((yearSpinner && monthSpinner && daySpinner) || hiddenBirthday) {
+    visibleAgeInput = Boolean(ageInput && isVisibleElement(ageInput));
+    visibleBirthdaySpinners = Boolean(
+      yearSpinner
+      && monthSpinner
+      && daySpinner
+      && isVisibleElement(yearSpinner)
+      && isVisibleElement(monthSpinner)
+      && isVisibleElement(daySpinner)
+    );
+    visibleBirthdaySelects = Boolean(
+      yearReactSelect?.button
+      && monthReactSelect?.button
+      && dayReactSelect?.button
+      && isVisibleElement(yearReactSelect.button)
+      && isVisibleElement(monthReactSelect.button)
+      && isVisibleElement(dayReactSelect.button)
+    );
+
+    if (visibleAgeInput) break;
+    if (visibleBirthdaySpinners || visibleBirthdaySelects) {
       birthdayMode = true;
       break;
     }
-    if (ageInput) break;
     await sleep(100);
   }
 
