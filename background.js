@@ -648,6 +648,11 @@ function isRestartCurrentAttemptError(error) {
   return /当前邮箱已存在，需要重新开始新一轮/.test(message);
 }
 
+function isStep9OAuthTimeoutError(error) {
+  const message = String(typeof error === 'string' ? error : error?.message || '');
+  return /STEP9_OAUTH_TIMEOUT::|认证失败:\s*Timeout waiting for OAuth callback/i.test(message);
+}
+
 function isStepDoneStatus(status) {
   return status === 'completed' || status === 'manual_completed' || status === 'skipped';
 }
@@ -1289,6 +1294,8 @@ async function ensureAutoEmailReady(targetRun, totalRuns, attemptRuns) {
 
 async function runAutoSequenceFromStep(startStep, context = {}) {
   const { targetRun, totalRuns, attemptRuns, continued = false } = context;
+  const maxStep9RestartAttempts = 5;
+  let step9RestartAttempts = 0;
 
   if (continued) {
     await addLog(`=== 目标 ${targetRun}/${totalRuns} 轮：继续当前进度，从步骤 ${startStep} 开始（第 ${attemptRuns} 次尝试）===`, 'info');
@@ -1321,8 +1328,23 @@ async function runAutoSequenceFromStep(startStep, context = {}) {
     await chrome.tabs.update(signupTabId, { active: true });
   }
 
-  for (let step = Math.max(startStep, 4); step <= 9; step++) {
-    await executeStepAndWait(step, AUTO_STEP_DELAYS[step]);
+  let step = Math.max(startStep, 4);
+  while (step <= 9) {
+    try {
+      await executeStepAndWait(step, AUTO_STEP_DELAYS[step]);
+      step += 1;
+    } catch (err) {
+      if (step === 9 && isStep9OAuthTimeoutError(err) && step9RestartAttempts < maxStep9RestartAttempts) {
+        step9RestartAttempts += 1;
+        await addLog(
+          `步骤 9：检测到 OAuth callback 超时，正在回到步骤 6 重新开始授权流程（${step9RestartAttempts}/${maxStep9RestartAttempts}）...`,
+          'warn'
+        );
+        step = 6;
+        continue;
+      }
+      throw err;
+    }
   }
 }
 
