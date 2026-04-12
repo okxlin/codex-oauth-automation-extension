@@ -28,8 +28,21 @@ const btnAutoRun = document.getElementById('btn-auto-run');
 const btnAutoContinue = document.getElementById('btn-auto-continue');
 const autoContinueBar = document.getElementById('auto-continue-bar');
 const btnClearLog = document.getElementById('btn-clear-log');
+const selectPanelMode = document.getElementById('select-panel-mode');
+const rowVpsUrl = document.getElementById('row-vps-url');
 const inputVpsUrl = document.getElementById('input-vps-url');
+const rowVpsPassword = document.getElementById('row-vps-password');
 const inputVpsPassword = document.getElementById('input-vps-password');
+const rowSub2ApiUrl = document.getElementById('row-sub2api-url');
+const inputSub2ApiUrl = document.getElementById('input-sub2api-url');
+const rowSub2ApiEmail = document.getElementById('row-sub2api-email');
+const inputSub2ApiEmail = document.getElementById('input-sub2api-email');
+const rowSub2ApiPassword = document.getElementById('row-sub2api-password');
+const inputSub2ApiPassword = document.getElementById('input-sub2api-password');
+const rowSub2ApiGroup = document.getElementById('row-sub2api-group');
+const inputSub2ApiGroup = document.getElementById('input-sub2api-group');
+const rowSub2ApiRedirectUri = document.getElementById('row-sub2api-redirect-uri');
+const inputSub2ApiRedirectUri = document.getElementById('input-sub2api-redirect-uri');
 const selectMailProvider = document.getElementById('select-mail-provider');
 const rowInbucketHost = document.getElementById('row-inbucket-host');
 const inputInbucketHost = document.getElementById('input-inbucket-host');
@@ -276,8 +289,14 @@ function setDefaultAutoRunButton() {
 
 function collectSettingsPayload() {
   return {
+    panelMode: selectPanelMode.value,
     vpsUrl: inputVpsUrl.value.trim(),
     vpsPassword: inputVpsPassword.value,
+    sub2apiUrl: inputSub2ApiUrl.value.trim(),
+    sub2apiEmail: inputSub2ApiEmail.value.trim(),
+    sub2apiPassword: inputSub2ApiPassword.value,
+    sub2apiGroupName: inputSub2ApiGroup.value.trim(),
+    sub2apiRedirectUri: inputSub2ApiRedirectUri.value.trim(),
     customPassword: inputPassword.value,
     mailProvider: selectMailProvider.value,
     inbucketHost: inputInbucketHost.value.trim(),
@@ -328,6 +347,7 @@ async function saveSettings(options = {}) {
 
     syncLatestState(payload);
     markSettingsDirty(false);
+    updatePanelModeUI();
     updateMailProviderUI();
     updateButtonStates();
     if (!silent) {
@@ -441,6 +461,24 @@ async function restoreState() {
     if (state.vpsPassword) {
       inputVpsPassword.value = state.vpsPassword;
     }
+    if (state.panelMode) {
+      selectPanelMode.value = state.panelMode;
+    }
+    if (state.sub2apiUrl) {
+      inputSub2ApiUrl.value = state.sub2apiUrl;
+    }
+    if (state.sub2apiEmail) {
+      inputSub2ApiEmail.value = state.sub2apiEmail;
+    }
+    if (state.sub2apiPassword) {
+      inputSub2ApiPassword.value = state.sub2apiPassword;
+    }
+    if (state.sub2apiGroupName) {
+      inputSub2ApiGroup.value = state.sub2apiGroupName;
+    }
+    if (state.sub2apiRedirectUri) {
+      inputSub2ApiRedirectUri.value = state.sub2apiRedirectUri;
+    }
     if (state.mailProvider) {
       selectMailProvider.value = state.mailProvider;
     }
@@ -468,6 +506,7 @@ async function restoreState() {
     markSettingsDirty(false);
     updateStatusDisplay(latestState);
     updateProgressCounter();
+    updatePanelModeUI();
     updateMailProviderUI();
     updateButtonStates();
   } catch (err) {
@@ -483,6 +522,22 @@ function updateMailProviderUI() {
   const useInbucket = selectMailProvider.value === 'inbucket';
   rowInbucketHost.style.display = useInbucket ? '' : 'none';
   rowInbucketMailbox.style.display = useInbucket ? '' : 'none';
+}
+
+function updatePanelModeUI() {
+  const useSub2Api = selectPanelMode.value === 'sub2api';
+  rowVpsUrl.style.display = useSub2Api ? 'none' : '';
+  rowVpsPassword.style.display = useSub2Api ? 'none' : '';
+  rowSub2ApiUrl.style.display = useSub2Api ? '' : 'none';
+  rowSub2ApiEmail.style.display = useSub2Api ? '' : 'none';
+  rowSub2ApiPassword.style.display = useSub2Api ? '' : 'none';
+  rowSub2ApiGroup.style.display = useSub2Api ? '' : 'none';
+  rowSub2ApiRedirectUri.style.display = useSub2Api ? '' : 'none';
+
+  const step9Btn = document.querySelector('.step-btn[data-step="9"]');
+  if (step9Btn) {
+    step9Btn.textContent = useSub2Api ? 'SUB2API 回调验证' : 'CPA 回调验证';
+  }
 }
 
 // ============================================================
@@ -952,6 +1007,52 @@ selectMailProvider.addEventListener('change', () => {
   saveSettings({ silent: true }).catch(() => { });
 });
 
+selectPanelMode.addEventListener('change', () => {
+  updatePanelModeUI();
+  markSettingsDirty(true);
+  saveSettings({ silent: true }).catch(() => { });
+});
+
+inputSub2ApiUrl.addEventListener('input', () => {
+  markSettingsDirty(true);
+  scheduleSettingsAutoSave();
+});
+inputSub2ApiUrl.addEventListener('blur', () => {
+  saveSettings({ silent: true }).catch(() => { });
+});
+
+inputSub2ApiEmail.addEventListener('input', () => {
+  markSettingsDirty(true);
+  scheduleSettingsAutoSave();
+});
+inputSub2ApiEmail.addEventListener('blur', () => {
+  saveSettings({ silent: true }).catch(() => { });
+});
+
+inputSub2ApiPassword.addEventListener('input', () => {
+  markSettingsDirty(true);
+  scheduleSettingsAutoSave();
+});
+inputSub2ApiPassword.addEventListener('blur', () => {
+  saveSettings({ silent: true }).catch(() => { });
+});
+
+inputSub2ApiGroup.addEventListener('input', () => {
+  markSettingsDirty(true);
+  scheduleSettingsAutoSave();
+});
+inputSub2ApiGroup.addEventListener('blur', () => {
+  saveSettings({ silent: true }).catch(() => { });
+});
+
+inputSub2ApiRedirectUri.addEventListener('input', () => {
+  markSettingsDirty(true);
+  scheduleSettingsAutoSave();
+});
+inputSub2ApiRedirectUri.addEventListener('blur', () => {
+  saveSettings({ silent: true }).catch(() => { });
+});
+
 inputInbucketMailbox.addEventListener('input', () => {
   markSettingsDirty(true);
   scheduleSettingsAutoSave();
@@ -1106,6 +1207,7 @@ updateSaveButtonState();
 restoreState().then(() => {
   syncPasswordToggleLabel();
   syncVpsUrlToggleLabel();
+  updatePanelModeUI();
   updateButtonStates();
   updateStatusDisplay(latestState);
 });
