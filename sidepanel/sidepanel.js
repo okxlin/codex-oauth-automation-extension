@@ -57,6 +57,7 @@ const inputSub2ApiPassword = document.getElementById('input-sub2api-password');
 const rowSub2ApiGroup = document.getElementById('row-sub2api-group');
 const inputSub2ApiGroup = document.getElementById('input-sub2api-group');
 const selectMailProvider = document.getElementById('select-mail-provider');
+const rowEmailGenerator = document.getElementById('row-email-generator');
 const selectEmailGenerator = document.getElementById('select-email-generator');
 const hotmailSection = document.getElementById('hotmail-section');
 const inputHotmailEmail = document.getElementById('input-hotmail-email');
@@ -921,6 +922,21 @@ function getCurrentHotmailAccount(state = latestState) {
   return getHotmailAccounts(state).find((account) => account.id === currentId) || null;
 }
 
+function getCurrentHotmailEmail(state = latestState) {
+  return String(getCurrentHotmailAccount(state)?.email || '').trim();
+}
+
+function isCurrentEmailManagedByHotmail(state = latestState) {
+  const hotmailEmail = getCurrentHotmailEmail(state);
+  if (!hotmailEmail) {
+    return false;
+  }
+
+  const inputEmailValue = String(inputEmail.value || '').trim();
+  const stateEmailValue = String(state?.email || '').trim();
+  return inputEmailValue === hotmailEmail || stateEmailValue === hotmailEmail;
+}
+
 function getHotmailAccountsByUsage(mode = 'all', state = latestState) {
   const accounts = getHotmailAccounts(state);
   if (typeof filterHotmailAccountsByUsage === 'function') {
@@ -1015,8 +1031,7 @@ function upsertHotmailAccountListLocally(accounts, nextAccount) {
 function refreshHotmailSelectionUI() {
   renderHotmailAccounts();
   if (selectMailProvider.value === 'hotmail-api') {
-    const currentAccount = getCurrentHotmailAccount();
-    inputEmail.value = currentAccount?.email || latestState?.email || '';
+    inputEmail.value = getCurrentHotmailEmail();
   }
 }
 
@@ -1129,12 +1144,17 @@ function renderHotmailAccounts() {
 function updateMailProviderUI() {
   const useInbucket = selectMailProvider.value === 'inbucket';
   const useHotmail = selectMailProvider.value === 'hotmail-api';
+  const useEmailGenerator = !useHotmail;
   rowInbucketHost.style.display = useInbucket ? '' : 'none';
   rowInbucketMailbox.style.display = useInbucket ? '' : 'none';
   const useCloudflare = selectEmailGenerator.value === 'cloudflare';
-  rowCfDomain.style.display = !useHotmail && useCloudflare ? '' : 'none';
+  const showCloudflareDomain = useEmailGenerator && useCloudflare;
+  if (rowEmailGenerator) {
+    rowEmailGenerator.style.display = useEmailGenerator ? '' : 'none';
+  }
+  rowCfDomain.style.display = showCloudflareDomain ? '' : 'none';
   const { domains } = getCloudflareDomainsFromState();
-  if (useCloudflare) {
+  if (showCloudflareDomain) {
     setCloudflareDomainEditMode(cloudflareDomainEditMode || domains.length === 0, { clearInput: false });
   } else {
     setCloudflareDomainEditMode(false, { clearInput: false });
@@ -1157,8 +1177,7 @@ function updateMailProviderUI() {
       : '先自动获取邮箱，或手动粘贴邮箱后再继续';
   }
   if (useHotmail) {
-    const currentAccount = getCurrentHotmailAccount();
-    inputEmail.value = currentAccount?.email || latestState?.email || '';
+    inputEmail.value = getCurrentHotmailEmail();
   }
   renderHotmailAccounts();
 }
@@ -2190,8 +2209,13 @@ inputPassword.addEventListener('blur', () => {
   saveSettings({ silent: true }).catch(() => { });
 });
 
-selectMailProvider.addEventListener('change', () => {
+selectMailProvider.addEventListener('change', async () => {
+  const previousProvider = latestState?.mailProvider || '';
+  const nextProvider = selectMailProvider.value;
   updateMailProviderUI();
+  if (previousProvider === 'hotmail-api' && nextProvider !== 'hotmail-api' && isCurrentEmailManagedByHotmail()) {
+    await clearRegistrationEmail({ silent: true }).catch(() => { });
+  }
   markSettingsDirty(true);
   saveSettings({ silent: true }).catch(() => { });
 });
@@ -2400,8 +2424,7 @@ chrome.runtime.onMessage.addListener((message) => {
       if (message.payload.currentHotmailAccountId !== undefined || message.payload.hotmailAccounts !== undefined) {
         renderHotmailAccounts();
         if (selectMailProvider.value === 'hotmail-api') {
-          const currentAccount = getCurrentHotmailAccount();
-          inputEmail.value = currentAccount?.email || latestState?.email || '';
+          inputEmail.value = getCurrentHotmailEmail();
         }
       }
       if (message.payload.autoRunDelayEnabled !== undefined) {
