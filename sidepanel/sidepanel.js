@@ -57,6 +57,7 @@ const inputSub2ApiPassword = document.getElementById('input-sub2api-password');
 const rowSub2ApiGroup = document.getElementById('row-sub2api-group');
 const inputSub2ApiGroup = document.getElementById('input-sub2api-group');
 const selectMailProvider = document.getElementById('select-mail-provider');
+const btnMailLogin = document.getElementById('btn-mail-login');
 const rowEmailGenerator = document.getElementById('row-email-generator');
 const selectEmailGenerator = document.getElementById('select-email-generator');
 const hotmailSection = document.getElementById('hotmail-section');
@@ -140,6 +141,20 @@ const filterHotmailAccountsByUsage = window.HotmailUtils?.filterHotmailAccountsB
 const getHotmailBulkActionLabel = window.HotmailUtils?.getHotmailBulkActionLabel;
 const getHotmailListToggleLabel = window.HotmailUtils?.getHotmailListToggleLabel;
 const HOTMAIL_LIST_EXPANDED_STORAGE_KEY = 'multipage-hotmail-list-expanded';
+const MAIL_PROVIDER_LOGIN_CONFIGS = {
+  '163': {
+    label: '163 邮箱',
+    url: 'https://mail.163.com/',
+  },
+  '163-vip': {
+    label: '163 VIP 邮箱',
+    url: 'https://webmail.vip.163.com/',
+  },
+  qq: {
+    label: 'QQ 邮箱',
+    url: 'https://wx.mail.qq.com/',
+  },
+};
 
 // ============================================================
 // Toast Notifications
@@ -926,6 +941,10 @@ function getCurrentHotmailEmail(state = latestState) {
   return String(getCurrentHotmailAccount(state)?.email || '').trim();
 }
 
+function getMailProviderLoginConfig(provider = selectMailProvider.value) {
+  return MAIL_PROVIDER_LOGIN_CONFIGS[String(provider || '').trim()] || null;
+}
+
 function isCurrentEmailManagedByHotmail(state = latestState) {
   const hotmailEmail = getCurrentHotmailEmail(state);
   if (!hotmailEmail) {
@@ -935,6 +954,16 @@ function isCurrentEmailManagedByHotmail(state = latestState) {
   const inputEmailValue = String(inputEmail.value || '').trim();
   const stateEmailValue = String(state?.email || '').trim();
   return inputEmailValue === hotmailEmail || stateEmailValue === hotmailEmail;
+}
+
+function updateMailLoginButtonState() {
+  if (!btnMailLogin) {
+    return;
+  }
+
+  const config = getMailProviderLoginConfig();
+  btnMailLogin.disabled = !config;
+  btnMailLogin.title = config ? `打开 ${config.label} 登录页` : '当前邮箱服务无需网页登录';
 }
 
 function getHotmailAccountsByUsage(mode = 'all', state = latestState) {
@@ -1145,6 +1174,7 @@ function updateMailProviderUI() {
   const useInbucket = selectMailProvider.value === 'inbucket';
   const useHotmail = selectMailProvider.value === 'hotmail-api';
   const useEmailGenerator = !useHotmail;
+  updateMailLoginButtonState();
   rowInbucketHost.style.display = useInbucket ? '' : 'none';
   rowInbucketMailbox.style.display = useInbucket ? '' : 'none';
   const useCloudflare = selectEmailGenerator.value === 'cloudflare';
@@ -1973,6 +2003,19 @@ btnToggleVpsUrl.addEventListener('click', () => {
 btnToggleVpsPassword.addEventListener('click', () => {
   inputVpsPassword.type = inputVpsPassword.type === 'password' ? 'text' : 'password';
   syncVpsPasswordToggleLabel();
+});
+
+btnMailLogin?.addEventListener('click', async () => {
+  const config = getMailProviderLoginConfig();
+  if (!config) {
+    return;
+  }
+
+  try {
+    await chrome.tabs.create({ url: config.url, active: true });
+  } catch (err) {
+    showToast(`打开${config.label}失败：${err.message}`, 'error');
+  }
 });
 
 localCpaStep9ModeButtons.forEach((button) => {
