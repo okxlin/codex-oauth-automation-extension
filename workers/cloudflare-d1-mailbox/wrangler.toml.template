@@ -1,0 +1,16 @@
+name = "${WORKER_NAME}"
+main = "src/email-worker.js"
+compatibility_date = "${COMPATIBILITY_DATE}"
+account_id = "${ACCOUNT_ID}"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "${DATABASE_NAME}"
+database_id = "${DATABASE_ID}"
+
+[triggers]
+crons = ["0 */6 * * *"]
+
+[vars]
+EMAIL_RETENTION_DAYS = "${EMAIL_RETENTION_DAYS}"
+CODE_RETENTION_DAYS = "${CODE_RETENTION_DAYS}"

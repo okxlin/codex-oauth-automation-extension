@@ -53,6 +53,7 @@
 - 自动显示当前使用中的密码，便于后续保存
 - 自动获取注册验证码与登录验证码
 - 支持 `Hotmail`：继续使用 `邮箱 + 客户端 ID + 刷新令牌（refresh token）`，并可在远程服务与本地助手两种模式间切换
+- 支持 `Cloudflare D1 邮箱`：可使用单节点或多节点随机节点池
 - 支持 `QQ Mail`、`163 Mail`、`Inbucket mailbox`
 - 支持从 DuckDuckGo Email Protection 自动生成新的 `@duck.com` 地址
 - 支持基于 Cloudflare 自定义域名自动生成随机邮箱前缀
@@ -96,6 +97,12 @@
 5. 点击 `获取` 生成邮箱，或手动粘贴一个你能收信的邮箱
 6. 先单步验证 `Step 1 ~ Step 4`
 7. 验证没问题后再点右上角 `Auto`
+
+> 如果你准备使用 `Cloudflare D1 邮箱`，可直接参考模板：
+> `docs/cloudflare-d1-mailbox/README.md`
+>
+> 如果你想走半自动部署，可运行：
+> `python scripts/deploy_cloudflare_d1_mailbox.py`
 
 ### 方案 B：`SUB2API + QQ / 163 / 163 VIP`
 

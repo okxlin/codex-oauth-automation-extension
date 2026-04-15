@@ -1,0 +1,15 @@
+name = "codex-d1-mailbox-worker"
+main = "email-worker.js"
+compatibility_date = "2026-04-15"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "codex-d1-mailbox"
+database_id = "YOUR_D1_DATABASE_ID"
+
+[triggers]
+crons = ["0 */6 * * *"]
+
+[vars]
+EMAIL_RETENTION_DAYS = "30"
+CODE_RETENTION_DAYS = "2"
