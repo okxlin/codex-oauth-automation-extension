@@ -155,6 +155,7 @@
             <option value="custom">自定义邮箱</option>
             <option value="hotmail-api">Hotmail（账号池）</option>
             <option value="luckmail-api">LuckMail（API 购邮）</option>
+            <option value="cloudflare-d1">Cloudflare D1 邮箱</option>
             <option value="163">163 邮箱 (mail.163.com)</option>
             <option value="163-vip">163 VIP 邮箱 (vip.163.com)</option>
             <option value="qq">QQ 邮箱 (wx.mail.qq.com)</option>
@@ -164,6 +165,37 @@
           </select>
           <button id="btn-mail-login" class="btn btn-outline btn-sm data-inline-btn" type="button" disabled>登录</button>
         </div>
+      </div>
+      <div class="data-row" id="row-cloudflare-d1-account-id" style="display:none;">
+        <span class="data-label">D1 Account</span>
+        <input type="text" id="input-cloudflare-d1-account-id" class="data-input mono" placeholder="Cloudflare Account ID" />
+      </div>
+      <div class="data-row" id="row-cloudflare-d1-database-id" style="display:none;">
+        <span class="data-label">D1 Database</span>
+        <input type="text" id="input-cloudflare-d1-database-id" class="data-input mono" placeholder="Cloudflare D1 Database ID" />
+      </div>
+      <div class="data-row" id="row-cloudflare-d1-api-token" style="display:none;">
+        <span class="data-label">D1 Token</span>
+        <input type="password" id="input-cloudflare-d1-api-token" class="data-input data-input-with-icon mono" placeholder="Cloudflare API Token（需含 D1 读取权限）" />
+      </div>
+      <div class="data-row" id="row-cloudflare-d1-domain" style="display:none;">
+        <span class="data-label">D1 域名</span>
+        <input type="text" id="input-cloudflare-d1-domain" class="data-input mono" placeholder="例如 mail.example.com" />
+      </div>
+      <div class="data-row" id="row-cloudflare-d1-actions" style="display:none;">
+        <span class="data-label">D1 节点</span>
+        <div class="data-inline">
+          <button id="btn-add-cloudflare-d1-node" class="btn btn-primary btn-sm" type="button">添加节点</button>
+          <button id="btn-clear-cloudflare-d1-nodes" class="btn btn-outline btn-sm" type="button">清空节点</button>
+        </div>
+      </div>
+      <div class="data-row" id="row-cloudflare-d1-summary" style="display:none;">
+        <span class="data-label">D1 策略</span>
+        <div id="cloudflare-d1-summary" class="data-value">未配置 Cloudflare D1 节点。</div>
+      </div>
+      <div class="data-row" id="row-cloudflare-d1-list" style="display:none;">
+        <span class="data-label">节点列表</span>
+        <div id="cloudflare-d1-list" class="hotmail-accounts-list"></div>
       </div>
       <div class="data-row" id="row-mail-2925-mode" style="display:none;">
         <span class="data-label">2925 模式</span>

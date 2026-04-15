@@ -62,6 +62,7 @@ let stopRequested = false;
 const STOP_ERROR_MESSAGE = '流程已被用户停止。';
 const HOTMAIL_PROVIDER = 'hotmail-api';
 const LUCKMAIL_PROVIDER = 'luckmail-api';
+const CLOUDFLARE_D1_PROVIDER = 'cloudflare-d1';
 const CLOUDFLARE_TEMP_EMAIL_PROVIDER = 'cloudflare-temp-email';
 const VERIFICATION_POLL_MAX_ROUNDS = 5;
 const logs = [];
@@ -75,6 +76,9 @@ async function pollHotmailVerificationCode() {
 }
 async function pollLuckmailVerificationCode() {
   throw new Error('luckmail path should not run in this test');
+}
+async function pollCloudflareD1VerificationCode() {
+  throw new Error('cloudflare d1 path should not run in this test');
 }
 function getVerificationCodeStateKey(step) {
   return step === 4 ? 'lastSignupCode' : 'lastLoginCode';
@@ -128,6 +132,7 @@ const api = new Function(`
 const STOP_ERROR_MESSAGE = '流程已被用户停止。';
 const HOTMAIL_PROVIDER = 'hotmail-api';
 const LUCKMAIL_PROVIDER = 'luckmail-api';
+const CLOUDFLARE_D1_PROVIDER = 'cloudflare-d1';
 const CLOUDFLARE_TEMP_EMAIL_PROVIDER = 'cloudflare-temp-email';
 const logs = [];
 let pollCalls = 0;
